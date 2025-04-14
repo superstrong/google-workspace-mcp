@@ -163,7 +163,29 @@ The server will automatically:
 
 ### Development Build
 
-For local development, you can build and run the container:
+#### Local Build Script
+
+For a fast, CI-like local build and Docker image creation, use the provided script:
+
+```bash
+# Run the local build pipeline (installs, lints, tests, builds, and creates Docker image)
+./scripts/build-local.sh
+```
+
+- By default, the image is tagged as `google-workspace-mcp:local`.
+- To use verbose output (print all logs to the console), add `--verbose`:
+  ```bash
+  ./scripts/build-local.sh --verbose
+  ```
+- To change the Docker image tag:
+  ```bash
+  ./scripts/build-local.sh --tag my-custom-tag
+  ```
+- Log files are written to `/tmp/google-workspace-mcp/` for review.
+
+#### Manual Docker Build
+
+You can also build and run the container manually:
 
 ```bash
 # Build the image
