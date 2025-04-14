@@ -95,10 +95,10 @@ run_step "Testing" "test" "npm run test || true"
 # Build TypeScript
 run_step "Building TypeScript" "build" "npm run build" || exit 1
 
-# Build Docker image
+# Build Docker image using the local Dockerfile
 echo "→ Building Docker image..."
 if [ "$VERBOSE" = true ]; then
-    if docker build -t "$IMAGE_TAG" .; then
+    if docker build -t "$IMAGE_TAG" -f "Dockerfile.local" .; then
         echo -e "${GREEN}${CHECK_MARK} Docker build successful${NC}"
     else
         echo -e "${RED}${X_MARK} Docker build failed${NC}"
@@ -106,7 +106,7 @@ if [ "$VERBOSE" = true ]; then
     fi
 else
     DOCKER_LOG="$TEMP_DIR/docker-build.log"
-    if docker build -t "$IMAGE_TAG" . > "$DOCKER_LOG" 2>&1; then
+    if docker build -t "$IMAGE_TAG" -f "Dockerfile.local" . > "$DOCKER_LOG" 2>&1; then
         echo -e "${GREEN}${CHECK_MARK} Docker build successful${NC} (log: $DOCKER_LOG)"
         check_log_size "$DOCKER_LOG"
     else
@@ -118,3 +118,4 @@ fi
 
 echo -e "\n${GREEN}Build complete!${NC} Image tagged as $IMAGE_TAG"
 echo "To change the image tag, use: ./scripts/build-local.sh --tag <your-tag>"
+echo "This build uses Dockerfile.local which is optimized for local development."
