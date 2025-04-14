@@ -27,8 +27,8 @@ import {
   handleGetWorkspaceGmailSettings,
   handleManageWorkspaceDraft,
   handleManageWorkspaceLabel,
-  handleManageWorkspaceLabelAssignment,
-  handleManageWorkspaceLabelFilter,
+  handleManageLabelAssignment,
+  handleManageLabelFilter,
   handleManageWorkspaceAttachment
 } from './gmail-handlers.js';
 
@@ -50,10 +50,14 @@ import {
   handleDeleteDriveFile
 } from './drive-handlers.js';
 
+// Import contact handlers
+import { handleGetContacts } from './contacts-handlers.js';
+
 // Import error types
 import { AccountError } from '../modules/accounts/types.js';
 import { GmailError } from '../modules/gmail/types.js';
 import { CalendarError } from '../modules/calendar/types.js';
+import { ContactsError } from '../modules/contacts/types.js';
 
 // Import service initializer
 import { initializeAllServices } from '../utils/service-initializer.js';
@@ -88,7 +92,8 @@ import {
   assertDriveFolderArgs,
   assertDrivePermissionArgs,
   assertDriveDeleteArgs,
-  assertManageAttachmentParams
+  assertManageAttachmentParams,
+  assertGetContactsParams
 } from './type-guards.js';
 
 export class GSuiteServer {
@@ -271,6 +276,12 @@ export class GSuiteServer {
             result = await handleDeleteDriveFile(args);
             break;
 
+          // Contact Operations
+          case 'get_workspace_contacts':
+            assertGetContactsParams(args);
+            result = await handleGetContacts(args);
+            break;
+
           default:
             throw new Error(`Unknown tool: ${request.params.name}`);
         }
@@ -295,10 +306,11 @@ export class GSuiteServer {
   }
 
   private formatErrorResponse(error: unknown) {
-    if (error instanceof AccountError || error instanceof GmailError || error instanceof CalendarError) {
+    if (error instanceof AccountError || error instanceof GmailError || error instanceof CalendarError || error instanceof ContactsError) {
       const details = error instanceof GmailError ? error.details :
                      error instanceof AccountError ? error.resolution :
                      error instanceof CalendarError ? error.message :
+                     error instanceof ContactsError ? error.details :
                      'Please try again or contact support if the issue persists';
       
       return {

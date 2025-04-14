@@ -1,5 +1,5 @@
 import {
-  BaseToolArguments,
+BaseToolArguments,
   CalendarEventParams,
   SendEmailArgs,
   ManageLabelParams,
@@ -15,6 +15,7 @@ import {
   DriveDeleteArgs,
   ManageAttachmentParams
 } from './types.js';
+import { GetContactsParams } from '../modules/contacts/types.js';
 
 // Base Tool Arguments
 export function isBaseToolArguments(args: Record<string, unknown>): args is BaseToolArguments {
@@ -326,5 +327,22 @@ export function assertManageAttachmentParams(args: unknown): asserts args is Man
 export function assertManageDraftParams(args: unknown): asserts args is ManageDraftParams {
   if (!isManageDraftParams(args)) {
     throw new Error('Invalid draft management parameters. Required: email, action');
+  }
+}
+
+// Contacts Type Guards
+export function isGetContactsParams(args: unknown): args is GetContactsParams {
+  if (typeof args !== 'object' || args === null) return false;
+  const params = args as Partial<GetContactsParams>;
+  
+  return typeof params.email === 'string' &&
+    typeof params.personFields === 'string' &&
+    (params.pageSize === undefined || typeof params.pageSize === 'number') &&
+    (params.pageToken === undefined || typeof params.pageToken === 'string');
+}
+
+export function assertGetContactsParams(args: unknown): asserts args is GetContactsParams {
+  if (!isGetContactsParams(args)) {
+    throw new Error('Invalid contacts parameters. Required: email, personFields');
   }
 }
