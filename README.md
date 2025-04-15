@@ -347,6 +347,19 @@ docker run -i --rm \
   - Delete calendar events
   - Notification options for attendees
 
+### Contacts Operations
+
+- `get_workspace_contacts` (aliases: get_contacts, list_contacts, fetch_contacts)
+  - Retrieve contacts from a Google account
+  - Support for:
+    - Basic contact information (names, emails, phones)
+    - Extended contact details
+    - Pagination for large contact lists
+  - Common use cases:
+    - Contact lookup
+    - Address book management
+    - Contact information retrieval
+
 ### Drive Operations
 
 #### File Management
