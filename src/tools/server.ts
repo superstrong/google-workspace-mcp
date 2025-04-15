@@ -27,8 +27,8 @@ import {
   handleGetWorkspaceGmailSettings,
   handleManageWorkspaceDraft,
   handleManageWorkspaceLabel,
-  handleManageLabelAssignment,
-  handleManageLabelFilter,
+  handleManageWorkspaceLabelAssignment,
+  handleManageWorkspaceLabelFilter,
   handleManageWorkspaceAttachment
 } from './gmail-handlers.js';
 

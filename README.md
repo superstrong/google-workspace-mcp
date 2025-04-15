@@ -64,6 +64,10 @@ See [detailed setup guide](#prerequisites) for more information.
 
 ## Prerequisites
 
+> **Important:**  
+> Before starting the MCP server, you must create the config directory (e.g., `~/.mcp/google-workspace-mcp`) yourself, and ensure it is owned by your user account.  
+> If this directory is missing or owned by root, the server will not be able to create or update configuration files and will fail to start.
+
 Before using this MCP server, you must set up your own Google Cloud Project with access to Google Workspace APIs:
 
 1. Create a new project in [Google Cloud Console](https://console.cloud.google.com)
@@ -142,7 +146,10 @@ You can customize the workspace location by setting the `WORKSPACE_BASE_PATH` en
 
 ### Manual Usage
 
-> **Important**: The server requires an `accounts.json` file in the mounted config directory. For first-time setup, copy `accounts.example.json` to `accounts.json` in your config directory before starting the container.
+> **Important:**  
+> The config directory you mount (e.g., `~/.mcp/google-workspace-mcp`) must exist and be owned by your user before starting the container.  
+> If it does not exist, create it with `mkdir -p ~/.mcp/google-workspace-mcp && chown $USER ~/.mcp/google-workspace-mcp`.  
+> The server will attempt to create `accounts.json` automatically if it is missing, but only if it has write access to the directory.
 
 You can run the container directly:
 
