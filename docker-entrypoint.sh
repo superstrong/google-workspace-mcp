@@ -34,5 +34,16 @@ export MCP_MODE=true
 export LOG_FILE="/app/logs/google-workspace-mcp.log"
 export WORKSPACE_BASE_PATH="$WORKSPACE_BASE_PATH"
 
+# Ensure /app/config/accounts.json exists, copy from example if missing, or create minimal if both missing
+if [ ! -f "/app/config/accounts.json" ]; then
+    if [ -f "/app/config/accounts.example.json" ]; then
+        log_info "accounts.json not found, copying from accounts.example.json"
+        cp /app/config/accounts.example.json /app/config/accounts.json
+    else
+        log_info "accounts.json and accounts.example.json not found, creating minimal accounts.json"
+        echo '{ "accounts": [] }' > /app/config/accounts.json
+    fi
+fi
+
 # Execute the main application
 exec node build/index.js
