@@ -66,8 +66,8 @@ export async function handleAuthenticateWorkspaceAccount(args: AuthenticateAccou
     };
   }
 
-  // Generate OAuth URL
-  const authUrl = await accountManager.generateAuthUrl();
+  // Generate OAuth URL and track which account is being authenticated
+  const authUrl = await accountManager.startAuthentication(args.email);
   
   // Check if we should use automatic completion (default: true)
   const useAutoComplete = args.auto_complete !== false;
@@ -82,7 +82,7 @@ export async function handleAuthenticateWorkspaceAccount(args: AuthenticateAccou
         instructions: useAutoComplete ? [
           '1. Click the authorization URL to open Google sign-in in your browser',
           '2. Sign in with your Google account and allow the requested permissions',
-          '3. After authorization, call complete_workspace_auth to finish authentication automatically'
+          '3. Authentication will complete automatically - you can start using the account immediately'
         ].join('\n') : [
           '1. Click the authorization URL below to open Google sign-in in your browser',
           '2. Sign in with your Google account and allow the requested permissions',
@@ -91,7 +91,7 @@ export async function handleAuthenticateWorkspaceAccount(args: AuthenticateAccou
           '5. Call this tool again with the auth_code parameter: authenticate_workspace_account with auth_code="your_code_here"'
         ].join('\n'),
         note: useAutoComplete 
-          ? 'The callback server will automatically capture your authorization. Use complete_workspace_auth after clicking the link.'
+          ? 'The callback server will automatically complete authentication in the background.'
           : 'The callback server is running on localhost:8080 and will display your authorization code for easy copying.',
         auto_complete_enabled: useAutoComplete
       }, null, 2)

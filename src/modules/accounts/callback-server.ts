@@ -8,6 +8,7 @@ export class OAuthCallbackServer {
   private port: number = 8080;
   private isRunning: boolean = false;
   private pendingPromises: Map<string, { resolve: (code: string) => void; reject: (error: Error) => void }> = new Map();
+  private authHandler?: (code: string, state: string) => Promise<void>;
   
   private constructor() {}
   
@@ -33,16 +34,21 @@ export class OAuthCallbackServer {
           req.on('data', chunk => {
             body += chunk.toString();
           });
-          req.on('end', () => {
+          req.on('end', async () => {
             try {
               const { code, state } = JSON.parse(body);
               
-              // Resolve the pending promise with the code
+              // Automatically complete the authentication
+              if (this.authHandler) {
+                await this.authHandler(code, state || 'default');
+                logger.info('OAuth authentication completed automatically');
+              }
+              
+              // Also resolve any pending promises (for backward compatibility)
               const pending = this.pendingPromises.get(state || 'default');
               if (pending) {
                 pending.resolve(code);
                 this.pendingPromises.delete(state || 'default');
-                logger.info('OAuth code automatically submitted and processed');
               }
               
               res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -183,6 +189,8 @@ export class OAuthCallbackServer {
               </html>
             `);
             
+            // Immediately trigger the authentication completion
+            // by posting to our own complete-auth endpoint
             // Don't resolve here anymore - let the auto-complete endpoint handle it
             return;
           }
@@ -228,5 +236,9 @@ export class OAuthCallbackServer {
   
   isServerRunning(): boolean {
     return this.isRunning;
+  }
+
+  setAuthHandler(handler: (code: string, state: string) => Promise<void>) {
+    this.authHandler = handler;
   }
 }
