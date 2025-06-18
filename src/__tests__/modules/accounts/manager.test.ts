@@ -51,7 +51,10 @@ describe('AccountManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    process.env.ACCOUNTS_FILE = '/mock/accounts.json';
+    // Clear environment variables that affect path resolution
+    delete process.env.MCP_MODE;
+    delete process.env.HOME;
+    process.env.ACCOUNTS_PATH = '/mock/accounts.json';
     // Default successful file read
     fs.readFile.mockResolvedValue(JSON.stringify(mockAccounts));
     
