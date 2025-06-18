@@ -18,6 +18,7 @@ import { ToolRegistry } from '../modules/tools/registry.js';
 import {
   handleListWorkspaceAccounts,
   handleAuthenticateWorkspaceAccount,
+  handleCompleteWorkspaceAuth,
   handleRemoveWorkspaceAccount
 } from './account-handlers.js';
 
@@ -181,6 +182,10 @@ export class GSuiteServer {
             break;
           case 'authenticate_workspace_account':
             result = await handleAuthenticateWorkspaceAccount(args as AuthenticateAccountArgs);
+            break;
+          case 'complete_workspace_auth':
+            assertBaseToolArguments(args);
+            result = await handleCompleteWorkspaceAuth(args);
             break;
           case 'remove_workspace_account':
             assertBaseToolArguments(args);

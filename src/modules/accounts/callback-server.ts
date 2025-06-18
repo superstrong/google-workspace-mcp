@@ -27,6 +27,35 @@ export class OAuthCallbackServer {
       this.server = http.createServer((req, res) => {
         const parsedUrl = url.parse(req.url || '', true);
         
+        // Handle the auto-complete endpoint
+        if (parsedUrl.pathname === '/complete-auth' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', () => {
+            try {
+              const { code, state } = JSON.parse(body);
+              
+              // Resolve the pending promise with the code
+              const pending = this.pendingPromises.get(state || 'default');
+              if (pending) {
+                pending.resolve(code);
+                this.pendingPromises.delete(state || 'default');
+                logger.info('OAuth code automatically submitted and processed');
+              }
+              
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: true }));
+            } catch (error) {
+              logger.error('Failed to process auto-complete request:', error);
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: false, error: 'Invalid request' }));
+            }
+          });
+          return;
+        }
+        
         if (parsedUrl.pathname === '/') {
           const code = parsedUrl.query.code as string;
           const error = parsedUrl.query.error as string;
@@ -61,68 +90,100 @@ export class OAuthCallbackServer {
                   <title>Google OAuth Authorization Successful</title>
                   <style>
                     body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-                    .code-box { 
-                      background: #f5f5f5; 
-                      border: 2px solid #ddd; 
-                      padding: 15px; 
-                      margin: 20px 0; 
-                      font-family: monospace; 
-                      font-size: 14px; 
-                      word-break: break-all;
-                      cursor: pointer;
+                    .success-message { 
+                      background: #4CAF50; 
+                      color: white; 
+                      padding: 20px; 
+                      border-radius: 5px; 
+                      margin-bottom: 20px;
+                      text-align: center;
                     }
-                    .code-box:hover { background: #e8e8e8; }
-                    .instructions { background: #e7f3ff; padding: 15px; border-left: 4px solid #2196F3; }
-                    ol li { margin: 8px 0; }
+                    .status { 
+                      background: #e7f3ff; 
+                      padding: 15px; 
+                      border-left: 4px solid #2196F3;
+                      margin: 20px 0;
+                    }
+                    .loading {
+                      display: inline-block;
+                      width: 20px;
+                      height: 20px;
+                      border: 3px solid #f3f3f3;
+                      border-top: 3px solid #3498db;
+                      border-radius: 50%;
+                      animation: spin 1s linear infinite;
+                      margin-left: 10px;
+                      vertical-align: middle;
+                    }
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                    .code-fallback {
+                      font-family: monospace;
+                      background: #f5f5f5;
+                      padding: 10px;
+                      margin: 10px 0;
+                      word-break: break-all;
+                      display: none;
+                    }
                   </style>
                 </head>
                 <body>
-                  <h1>✅ Authorization Successful!</h1>
-                  
-                  <div class="instructions">
-                    <h3>📋 Copy Your Authorization Code</h3>
-                    <p>Click the code below to select it, then copy and paste it back to Claude Desktop:</p>
+                  <div class="success-message">
+                    <h1>✅ Authorization Successful!</h1>
                   </div>
                   
-                  <div class="code-box" onclick="selectCode()" id="authCode">
-                    ${code}
+                  <div class="status" id="status">
+                    <h3>Completing authentication automatically...</h3>
+                    <p>Please wait while we complete the authentication process <span class="loading"></span></p>
                   </div>
                   
-                  <div class="instructions">
-                    <h3>📝 Next Steps:</h3>
-                    <ol>
-                      <li><strong>Copy</strong> the authorization code above (click to select)</li>
-                      <li><strong>Return</strong> to Claude Desktop</li>
-                      <li><strong>Provide</strong> the code to complete your Google account authentication</li>
-                      <li><strong>Close</strong> this window after copying the code</li>
-                    </ol>
+                  <div class="code-fallback" id="codeFallback">
+                    <p>If automatic authentication fails, you can manually copy this code:</p>
+                    <code>${code}</code>
                   </div>
                   
                   <script>
-                    function selectCode() {
-                      const codeElement = document.getElementById('authCode');
-                      const range = document.createRange();
-                      range.selectNodeContents(codeElement);
-                      const selection = window.getSelection();
-                      selection.removeAllRanges();
-                      selection.addRange(range);
+                    // Automatically submit the authorization code to complete the flow
+                    async function completeAuth() {
+                      try {
+                        // Send the code to a special endpoint that will trigger the promise resolution
+                        const response = await fetch('/complete-auth', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ 
+                            code: '${code}',
+                            state: '${state}'
+                          })
+                        });
+                        
+                        if (response.ok) {
+                          document.getElementById('status').innerHTML = 
+                            '<h3>✅ Authentication Complete!</h3>' +
+                            '<p>You can now close this window and return to Claude Desktop.</p>';
+                        } else {
+                          throw new Error('Failed to complete authentication');
+                        }
+                      } catch (error) {
+                        console.error('Auto-complete failed:', error);
+                        document.getElementById('status').innerHTML = 
+                          '<h3>⚠️ Automatic completion failed</h3>' +
+                          '<p>Please copy the code below and paste it back to Claude Desktop:</p>';
+                        document.getElementById('codeFallback').style.display = 'block';
+                      }
                     }
                     
-                    // Auto-select the code when page loads
-                    window.onload = function() {
-                      selectCode();
-                    };
+                    // Start the auto-completion process
+                    setTimeout(completeAuth, 500);
                   </script>
                 </body>
               </html>
             `);
             
-            // Resolve the corresponding promise
-            const pending = this.pendingPromises.get(state);
-            if (pending) {
-              pending.resolve(code);
-              this.pendingPromises.delete(state);
-            }
+            // Don't resolve here anymore - let the auto-complete endpoint handle it
             return;
           }
         }
