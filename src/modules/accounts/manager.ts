@@ -11,9 +11,13 @@ export class AccountManager {
   private accounts: Map<string, Account>;
   private tokenManager!: TokenManager;
   private oauthClient!: GoogleOAuthClient;
+  private currentAuthEmail?: string;
 
   constructor(config?: AccountModuleConfig) {
-    this.accountsPath = config?.accountsPath || path.resolve('/app/config/accounts.json');
+    // Use environment variable or config, fallback to Docker default
+    const defaultPath = process.env.ACCOUNTS_PATH || 
+                       (process.env.MCP_MODE ? path.resolve(process.env.HOME || '', '.mcp/google-workspace-mcp/accounts.json') : '/app/config/accounts.json');
+    this.accountsPath = config?.accountsPath || defaultPath;
     this.accounts = new Map();
   }
 
@@ -21,6 +25,25 @@ export class AccountManager {
     logger.info('Initializing AccountManager...');
     this.oauthClient = new GoogleOAuthClient();
     this.tokenManager = new TokenManager(this.oauthClient);
+    
+    // Set up automatic authentication completion
+    const { OAuthCallbackServer } = await import('./callback-server.js');
+    const callbackServer = OAuthCallbackServer.getInstance();
+    callbackServer.setAuthHandler(async (code: string) => {
+      if (this.currentAuthEmail) {
+        try {
+          logger.info(`Auto-completing authentication for ${this.currentAuthEmail}`);
+          const tokenData = await this.getTokenFromCode(code);
+          await this.saveToken(this.currentAuthEmail, tokenData);
+          logger.info(`Authentication completed automatically for ${this.currentAuthEmail}`);
+          this.currentAuthEmail = undefined;
+        } catch (error) {
+          logger.error('Failed to auto-complete authentication:', error);
+          this.currentAuthEmail = undefined;
+        }
+      }
+    });
+    
     await this.loadAccounts();
     logger.info('AccountManager initialized successfully');
   }
@@ -345,6 +368,12 @@ export class AccountManager {
   async generateAuthUrl(): Promise<string> {
     const allScopes = scopeRegistry.getAllScopes();
     return this.oauthClient.generateAuthUrl(allScopes);
+  }
+  
+  async startAuthentication(email: string): Promise<string> {
+    this.currentAuthEmail = email;
+    logger.info(`Starting authentication for ${email}`);
+    return this.generateAuthUrl();
   }
 
   async waitForAuthorizationCode(): Promise<string> {

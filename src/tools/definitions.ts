@@ -70,6 +70,34 @@ export const accountTools: ToolMetadata[] = [
         auth_code: {
           type: 'string',
           description: 'Authorization code from Google OAuth (for initial authentication)'
+        },
+        auto_complete: {
+          type: 'boolean',
+          description: 'Whether to use automatic authentication completion (default: true)'
+        }
+      },
+      required: ['email']
+    }
+  },
+  {
+    name: 'complete_workspace_auth',
+    category: 'Account Management',
+    description: `Complete OAuth authentication automatically by waiting for callback.
+    
+    This tool waits for the user to complete OAuth authorization in their browser
+    and automatically captures the authorization code when the callback is received.
+    
+    IMPORTANT: Only use this AFTER authenticate_workspace_account has returned an auth_url
+    and the user has clicked on it to start the authorization process.
+    
+    The tool will wait up to 2 minutes for the authorization to complete.`,
+    aliases: ['wait_for_auth', 'complete_auth'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: 'Email address of the account being authenticated'
         }
       },
       required: ['email']
@@ -703,7 +731,13 @@ export const calendarTools: ToolMetadata[] = [
   {
     name: 'delete_workspace_calendar_event',
     category: 'Calendar/Events',
-    description: 'Delete a calendar event',
+    description: `Delete a calendar event with options for recurring events.
+    
+    For recurring events, you can specify a deletion scope:
+    - "entire_series": Removes all instances of the recurring event (default)
+    - "this_and_following": Removes the selected instance and all future occurrences while preserving past instances
+    
+    This provides more granular control over calendar management and prevents accidental deletion of entire event series.`,
     aliases: ['delete_event', 'remove_event', 'cancel_event'],
     inputSchema: {
       type: 'object',
@@ -720,6 +754,11 @@ export const calendarTools: ToolMetadata[] = [
           type: 'string',
           enum: ['all', 'externalOnly', 'none'],
           description: 'Whether to send update notifications'
+        },
+        deletionScope: {
+          type: 'string',
+          enum: ['entire_series', 'this_and_following'],
+          description: 'For recurring events, specifies which instances to delete'
         }
       },
       required: ['email', 'eventId']

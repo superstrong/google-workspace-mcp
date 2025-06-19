@@ -25,7 +25,7 @@ export class GoogleOAuthClient {
     this.oauth2Client = new OAuth2Client(
       clientId,
       clientSecret,
-      this.callbackServer.getCallbackUrl() // Use localhost:8080 instead of OOB
+      this.callbackServer.getCallbackUrl() // Use localhost:3000 instead of OOB
     );
     logger.info('OAuth client initialized successfully');
     

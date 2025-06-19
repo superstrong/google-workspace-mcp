@@ -32,7 +32,7 @@ Turn Google Drive from a file dump into your digital command center. Every docum
 2. **OAuth Credentials**:
    - Create OAuth 2.0 credentials
    - Choose "Web application" type
-   - Set redirect URI to: `http://localhost:8080`
+   - Set redirect URI to: `http://localhost:3000`
    - Save your Client ID and Client Secret
 
 3. **Local Setup**:
@@ -54,7 +54,7 @@ Add the server to your MCP client configuration:
         "run",
         "--rm",
         "-i",
-        "-p", "8080:8080",
+        "-p", "3000:3000",
         "-v", "~/.mcp/google-workspace-mcp:/app/config",
         "-v", "~/Documents/workspace-mcp-files:/app/workspace",
         "-e", "GOOGLE_CLIENT_ID",
@@ -81,7 +81,7 @@ Add the server to your MCP client configuration:
         "run",
         "--rm",
         "-i",
-        "-p", "8080:8080",
+        "-p", "3000:3000",
         "-v", "~/.mcp/google-workspace-mcp:/app/config",
         "-v", "~/Documents/workspace-mcp-files:/app/workspace",
         "-e", "GOOGLE_CLIENT_ID",
@@ -99,7 +99,7 @@ Add the server to your MCP client configuration:
 ```
 
 **Key Configuration Notes**:
-- Port mapping `-p 8080:8080` is required for OAuth callback handling
+- Port mapping `-p 3000:3000` is required for OAuth callback handling
 - Replace placeholder credentials with your actual Google Cloud OAuth credentials
 - The `LOG_MODE=strict` setting is recommended but not required
 
@@ -123,7 +123,7 @@ Logging modes:
 
 The server implements a secure OAuth 2.0 flow:
 
-1. **Callback Server**: Automatically starts on `localhost:8080` to handle OAuth redirects
+1. **Callback Server**: Automatically starts on `localhost:3000` to handle OAuth redirects
 2. **Authorization**: Generates Google OAuth URLs for user authentication
 3. **Token Management**: Securely stores and automatically refreshes access tokens
 4. **Multi-Account**: Supports multiple Google accounts with isolated token storage
@@ -207,11 +207,11 @@ cd google-workspace-mcp
 - Verify OAuth credentials are correctly configured
 - Ensure APIs (Gmail, Calendar, Drive) are enabled in Google Cloud
 - Check that you're added as a test user in OAuth consent screen
-- Confirm redirect URI is set to `http://localhost:8080`
+- Confirm redirect URI is set to `http://localhost:3000`
 
 **Connection Issues**:
-- Verify port 8080 is available and not blocked by firewall
-- Ensure Docker has permission to bind to port 8080
+- Verify port 3000 is available and not blocked by firewall
+- Ensure Docker has permission to bind to port 3000
 - Check that config directory exists and has proper permissions
 
 **Docker Issues**:

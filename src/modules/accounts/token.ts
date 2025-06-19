@@ -15,8 +15,10 @@ export class TokenManager {
   private readonly TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000; // 5 minutes buffer
 
   constructor(oauthClient?: GoogleOAuthClient) {
-    // Use the mounted config directory for persistent storage
-    this.credentialsPath = path.resolve('/app/config/credentials');
+    // Use environment variable or config, fallback to Docker default
+    const defaultPath = process.env.CREDENTIALS_PATH || 
+                       (process.env.MCP_MODE ? path.resolve(process.env.HOME || '', '.mcp/google-workspace-mcp/credentials') : '/app/config/credentials');
+    this.credentialsPath = defaultPath;
     this.oauthClient = oauthClient;
   }
 

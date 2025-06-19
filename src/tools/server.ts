@@ -18,6 +18,7 @@ import { ToolRegistry } from '../modules/tools/registry.js';
 import {
   handleListWorkspaceAccounts,
   handleAuthenticateWorkspaceAccount,
+  handleCompleteWorkspaceAuth,
   handleRemoveWorkspaceAccount
 } from './account-handlers.js';
 
@@ -182,6 +183,10 @@ export class GSuiteServer {
           case 'authenticate_workspace_account':
             result = await handleAuthenticateWorkspaceAccount(args as AuthenticateAccountArgs);
             break;
+          case 'complete_workspace_auth':
+            assertBaseToolArguments(args);
+            result = await handleCompleteWorkspaceAuth(args);
+            break;
           case 'remove_workspace_account':
             assertBaseToolArguments(args);
             result = await handleRemoveWorkspaceAccount(args);
@@ -287,10 +292,15 @@ export class GSuiteServer {
         }
 
         // Wrap result in McpToolResponse format
+        // Handle undefined results (like from void functions)
+        const responseText = result === undefined ? 
+          JSON.stringify({ status: 'success', message: 'Operation completed successfully' }, null, 2) : 
+          JSON.stringify(result, null, 2);
+        
         return {
           content: [{
             type: 'text',
-            text: JSON.stringify(result, null, 2)
+            text: responseText
           }],
           _meta: {}
         };
