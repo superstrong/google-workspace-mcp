@@ -92,7 +92,7 @@ export async function handleAuthenticateWorkspaceAccount(args: AuthenticateAccou
         ].join('\n'),
         note: useAutoComplete 
           ? 'The callback server will automatically complete authentication in the background.'
-          : 'The callback server is running on localhost:8080 and will display your authorization code for easy copying.',
+          : 'The callback server is running on localhost:3000 and will display your authorization code for easy copying.',
         auto_complete_enabled: useAutoComplete
       }, null, 2)
     }]

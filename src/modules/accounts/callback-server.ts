@@ -5,7 +5,7 @@ import logger from '../../utils/logger.js';
 export class OAuthCallbackServer {
   private static instance?: OAuthCallbackServer;
   private server?: http.Server;
-  private port: number = 8080;
+  private port: number = 3000;
   private isRunning: boolean = false;
   private pendingPromises: Map<string, { resolve: (code: string) => void; reject: (error: Error) => void }> = new Map();
   private authHandler?: (code: string, state: string) => Promise<void>;
@@ -62,7 +62,7 @@ export class OAuthCallbackServer {
           return;
         }
         
-        if (parsedUrl.pathname === '/') {
+        if (parsedUrl.pathname === '/auth/callback' || parsedUrl.pathname === '/') {
           const code = parsedUrl.query.code as string;
           const error = parsedUrl.query.error as string;
           const state = parsedUrl.query.state as string || 'default';
@@ -231,7 +231,7 @@ export class OAuthCallbackServer {
   }
   
   getCallbackUrl(): string {
-    return `http://localhost:${this.port}`;
+    return `http://localhost:${this.port}/auth/callback`;
   }
   
   isServerRunning(): boolean {

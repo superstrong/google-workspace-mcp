@@ -11,7 +11,7 @@ The Google Workspace MCP server enables AI assistants to interact with your Goog
 ### System Requirements
 - Docker installed and running
 - Internet connection for Google API access
-- Available port 8080 for OAuth callback handling
+- Available port 3000 for OAuth callback handling
 
 ### Google Cloud Setup
 
@@ -41,7 +41,7 @@ The Google Workspace MCP server enables AI assistants to interact with your Goog
    - Click "Create Credentials" > "OAuth 2.0 Client IDs"
    - **Important**: Select "Web application" (not Desktop application)
    - Set application name: "Google Workspace MCP Server"
-   - Add authorized redirect URI: `http://localhost:8080`
+   - Add authorized redirect URI: `http://localhost:3000`
    - Save and note your Client ID and Client Secret
 
 ## Installation Steps
@@ -76,7 +76,7 @@ Add the following configuration:
         "run",
         "--rm",
         "-i",
-        "-p", "8080:8080",
+        "-p", "3000:3000",
         "-v", "~/.mcp/google-workspace-mcp:/app/config",
         "-v", "~/Documents/workspace-mcp-files:/app/workspace",
         "-e", "GOOGLE_CLIENT_ID",
@@ -107,7 +107,7 @@ Edit your Cline MCP settings file:
         "run",
         "--rm",
         "-i",
-        "-p", "8080:8080",
+        "-p", "3000:3000",
         "-v", "~/.mcp/google-workspace-mcp:/app/config",
         "-v", "~/Documents/workspace-mcp-files:/app/workspace",
         "-e", "GOOGLE_CLIENT_ID",
@@ -127,7 +127,7 @@ Edit your Cline MCP settings file:
 **Important Configuration Notes**:
 - Replace `your-client-id.apps.googleusercontent.com` with your actual Google OAuth Client ID
 - Replace `your-client-secret` with your actual Google OAuth Client Secret
-- The `-p 8080:8080` port mapping is required for OAuth callback handling
+- The `-p 3000:3000` port mapping is required for OAuth callback handling
 - Adjust volume paths if you prefer different local directories
 
 ### Step 3: Restart Your AI Assistant
@@ -190,11 +190,11 @@ After authentication, verify the setup works:
 - Ensure OAuth consent screen is properly configured
 - Check that you're added as a test user
 
-**Problem**: "Connection refused" on localhost:8080
+**Problem**: "Connection refused" on localhost:3000
 **Solution**:
-- Verify port 8080 is not blocked by firewall
-- Ensure Docker has permission to bind to port 8080
-- Check that no other service is using port 8080
+- Verify port 3000 is not blocked by firewall
+- Ensure Docker has permission to bind to port 3000
+- Check that no other service is using port 3000
 
 ### Configuration Issues
 
@@ -258,7 +258,7 @@ To use a different directory for file operations:
   "run",
   "--rm",
   "-i",
-  "-p", "8080:8080",
+  "-p", "3000:3000",
   "-v", "~/.mcp/google-workspace-mcp:/app/config",
   "-v", "/path/to/your/workspace:/app/workspace",
   "-e", "WORKSPACE_BASE_PATH=/app/workspace",

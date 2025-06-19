@@ -18,11 +18,11 @@ The OAuth callback server now automatically submits the authorization code back 
    ```
 
 2. **Server returns auth URL**
-   - The callback server is already listening on localhost:8080
+   - The callback server is already listening on localhost:3000
    - User clicks the auth URL to open Google sign-in
 
 3. **User authorizes in browser**
-   - Google redirects to `http://localhost:8080/?code=AUTH_CODE`
+   - Google redirects to `http://localhost:3000/?code=AUTH_CODE`
    - The callback page automatically POSTs the code to `/complete-auth`
 
 4. **Automatic completion**

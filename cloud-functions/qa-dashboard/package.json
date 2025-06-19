@@ -1,0 +1,24 @@
+{
+  "name": "qa-dashboard",
+  "version": "1.0.0",
+  "description": "QA Dashboard for testing Google Workspace MCP Cloud Functions",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "gcloud functions deploy qa-dashboard --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 256MB --timeout 30s",
+    "dev": "functions-framework --target=qaDashboard --port=8082"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.3.0",
+    "@google-cloud/firestore": "^7.1.0",
+    "@google-cloud/secret-manager": "^5.0.1",
+    "googleapis": "^128.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

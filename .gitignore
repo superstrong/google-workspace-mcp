@@ -12,6 +12,7 @@ dist/
 # Environment
 .env
 .env.*
+.envrc
 
 # Credentials
 config/gauth.json
